@@ -1,0 +1,23 @@
+node {
+    withMaven(maven:'maven') {
+    	dir('../istatproxy@script') {
+        	stage('Build') {
+       	   		sh 'mvn clean install -Dmaven.test.failure.ignore=true'
+           		def pom = readMavenPom file:'pom.xml'
+           		print pom.version
+           		env.version = pom.version
+           		step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+           }
+           stage('Test') {
+       			archive "target/**/*"
+            	junit 'target/surefire-reports/*.xml'
+           }
+	        stage('Image') {
+    	        docker.withRegistry('http://docker.rete.dom:5000/') {
+                	def app = docker.build "docker.rete.dom:5000/istatproxy:${env.version}"
+                	app.push("${env.version}")
+            	}
+        	}
+        }
+    }
+}

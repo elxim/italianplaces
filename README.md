@@ -1,12 +1,9 @@
 ### Progetto per la creazione di un servizio JSON per la consultazione dei comuni
 
--- Per la documentazione  : http://localhost:8080/istatproxy/swagger-ui.html
+-- Swagger Documentation  : http://localhost:8080/istatproxy/swagger-ui.html
 
-#### Pubblicazione su Docker 
+#### Docker Publications
 
-E' stato pubblicato su Docker al link : http://192.168.125.140:8084/istatproxy/swagger-ui.html 
-
-Le variabili d'ambiente da configurare è la variabile $APP_HOME 
 
 ##### Versione
 

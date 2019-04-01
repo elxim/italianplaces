@@ -41,8 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 public class Comuni implements ComuniRepositoryI {
 
 	private ComuniProperties properties;
-	
-
 
 	@Getter
 	private Boolean comuniLoaded = true;
@@ -52,8 +50,8 @@ public class Comuni implements ComuniRepositoryI {
 	private LocalDateTime lastUpdate = null;
 	private LocalDateTime lastCheck = null;
 
-	private long  lastUpdateSoppressi;
-	
+	private long lastUpdateSoppressi;
+
 	private String numeroComuniCaricati = "";
 
 	private String istatSourceName = "";
@@ -72,17 +70,18 @@ public class Comuni implements ComuniRepositoryI {
 	 * 
 	 * @return
 	 */
-	
+
 	// 1000*60*60*12
 	@Scheduled(fixedDelay = 43200000, initialDelay = 43200000)
 	public boolean reload() {
 
 		this.lastCheck = LocalDateTime.now();
 
-		try { // Se il file istat è cambiato o se è stato modificato il file dei comuni soppressi ricarico tutto
+		try { // Se il file istat è cambiato o se è stato modificato il file dei comuni
+				// soppressi ricarico tutto
 			if (Storage.compare(properties.getSourceUrl(), properties.getLocalPath().concat(properties.getXlsname()))
-					||
-					(new File(properties.getLocalPath().concat(properties.getXlsSoppressi()))).lastModified()>this.lastUpdateSoppressi) {
+					|| (new File(properties.getLocalPath().concat(properties.getXlsSoppressi())))
+							.lastModified() > this.lastUpdateSoppressi) {
 				loadXls();
 				this.lastUpdate = LocalDateTime.now();
 				return true;
@@ -99,32 +98,25 @@ public class Comuni implements ComuniRepositoryI {
 
 	}
 
-	
-	
-		
-	
 	/**
 	 * Metodo per il caricamento del file xls da sito istat
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
 	private void loadXls() throws IOException {
 
 		log.info("loadXls: Start!");
 		this.lastCheck = LocalDateTime.now();
-	
 
-		
 		try {
-		
-		
+
 			// Scarico e Memorizzo il file dei comuni
 			Storage.putFile(properties.getSourceUrl(), properties.getLocalPath().concat(properties.getXlsname()));
 
 			InputStream is = Storage.getFile(properties.getLocalPath().concat(properties.getXlsname()));
-			
+
 			loadComuni(is); // Carico i comuni
-			
-		
+
 			is.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -135,25 +127,22 @@ public class Comuni implements ComuniRepositoryI {
 			comuniLoaded = false;
 			is.close();
 		}
-		
 
-		
-	
-		
-		// Carico i comuni soppressi
-		
-		InputStream isSoppressi = Storage.getFile(properties.getLocalPath().concat(properties.getXlsSoppressi()));
-		
-		
 		// Memorizzo l'impronta del file
 		File soppressi = new File(properties.getLocalPath().concat(properties.getXlsSoppressi()));
-		
-		lastUpdateSoppressi = soppressi.lastModified();
 
-		loadComuni(isSoppressi);
-		
-		
-		
+		if (soppressi.exists()) {
+
+			// Carico i comuni soppressi
+
+			InputStream isSoppressi = Storage.getFile(properties.getLocalPath().concat(properties.getXlsSoppressi()));
+
+			lastUpdateSoppressi = soppressi.lastModified();
+
+			loadComuni(isSoppressi);
+		} else
+			log.info("Non carico i comuni soppressi!");
+
 	}
 
 	// Restiruisce la lista di tutti i comuni
@@ -212,9 +201,8 @@ public class Comuni implements ComuniRepositoryI {
 		return listaComuniPerProvincia;
 	}
 
-	
-	private void loadComuni (InputStream is) {
-		
+	private void loadComuni(InputStream is) {
+
 		try {
 
 			Workbook workbook = new HSSFWorkbook(is);
@@ -241,9 +229,9 @@ public class Comuni implements ComuniRepositoryI {
 					int counter = 1;
 					while (cellIterator.hasNext()) {
 						Cell cell = cellIterator.next();
-						
+
 						cell.setCellType(CellType.STRING);
-								
+
 						comune.setValue(counter++, cell.getStringCellValue());
 					}
 
@@ -257,14 +245,11 @@ public class Comuni implements ComuniRepositoryI {
 			}
 			log.info("Comuni Caricati : " + --counterRaw);
 
-
 			workbook.close();
-
 
 			numeroComuniCaricati = String.valueOf(counterRaw);
 
 			// Comunario caricato
-
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -272,10 +257,9 @@ public class Comuni implements ComuniRepositoryI {
 			comuniLoaded = false;
 			log.error("ERRORE NEL CARICAMENTO XLS");
 		}
-		
+
 	}
-	
-	
+
 	// Lista Comuni per Città Metropolitana
 	public Set<String> listaComuniPerCittàMetropolitana(String denominazioneCittàMetropolitana) {
 		Set<String> listaComuniPerCittàMetropolitana = new HashSet<String>();
@@ -293,21 +277,19 @@ public class Comuni implements ComuniRepositoryI {
 	public Comune getComunebyId(String id) {
 		return comunario.get(id);
 	}
-	
-	
-	//Restituisce il comune in base alla denominazione
+
+	// Restituisce il comune in base alla denominazione
 	public TreeSet<Comune> getComunibyName(String nameComune) {
-		
+
 		TreeSet<Comune> listaComuni = new TreeSet<Comune>();
-			
+
 		comunario.forEach((k, v) -> {
-			if (v.getDenominazioneItaliano().toLowerCase()
-					.startsWith(nameComune.toLowerCase()))
+			if (v.getDenominazioneItaliano().toLowerCase().startsWith(nameComune.toLowerCase()))
 				listaComuni.add(v);
 		});
-		
+
 		return listaComuni;
-		
+
 	}
 
 	// Restituisce il numero di comuni

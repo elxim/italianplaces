@@ -1,5 +1,7 @@
 package it.istat.proxy;
 
+import java.util.Optional;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,7 +21,8 @@ public class SwaggerConfig {
 
 		return new Docket(DocumentationType.SWAGGER_2).select()
 				.apis(RequestHandlerSelectors.basePackage("it.istat.proxy.controller")).paths(PathSelectors.any())
-				.build().apiInfo(apiInfo());
+				.build().apiInfo(apiInfo())
+				.genericModelSubstitutes(Optional.class); // add this
 
 	}
 

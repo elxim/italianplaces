@@ -6,11 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 
 @Component
 @ConfigurationProperties(prefix = "it.istat.proxy")
-@Slf4j
+@Log4j
 public @Data class ComuniProperties {
 
 	private String sourceUrl;

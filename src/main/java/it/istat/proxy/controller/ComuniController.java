@@ -2,6 +2,7 @@ package it.istat.proxy.controller;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.ApiParam;
 import it.istat.proxy.model.Comune;
 import it.istat.proxy.model.ComuneJson;
 import it.istat.proxy.model.ComuniJson;
@@ -16,10 +18,10 @@ import it.istat.proxy.model.ListaComuniJson;
 import it.istat.proxy.model.Response;
 import it.istat.proxy.storage.ComuniRepositoryI;
 import it.istat.proxy.utils.CalcDuration;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 
 @RestController
-@Slf4j
+@Log4j
 public class ComuniController {
 
 	@Autowired
@@ -77,11 +79,23 @@ public class ComuniController {
 	 * @param denominazioneComune
 	 * @return
 	 */
-	@RequestMapping(value = "/comuni/{denominazioneComune}", method = RequestMethod.GET)
-	public Response dettaglioComuni(@PathVariable("denominazioneComune") String denominazioneComune) {
+	@RequestMapping(value = {"/comuni/{denominazioneComune}",
+				"/comuni/{denominazioneComune}/{altraDenominazione}"}, method = RequestMethod.GET)
+	public Response dettaglioComuni(@PathVariable("denominazioneComune") String denominazioneComune,
+			@PathVariable("altraDenominazione") @ApiParam(required = false) Optional<String> altraDenominazione) {
+		
+		/**
+		 * @mpizza 20190322 bugfix per i comuni con il carattere /
+		 */
+		if (altraDenominazione.isPresent())
+			denominazioneComune = denominazioneComune.concat("/").concat(altraDenominazione.get());
+
 		log.info("/comuni/".concat(denominazioneComune));
+		
 		LocalDateTime start = LocalDateTime.now();
+		
 		Response risposta = new ComuniJson(comunario.getComunibyName(denominazioneComune));
+		
 		log.info("/comuni/{denominazioneComune} : end in : ".concat(CalcDuration.secondi(start)));
 		return risposta;
 	}

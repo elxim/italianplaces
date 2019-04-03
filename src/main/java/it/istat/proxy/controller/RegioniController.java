@@ -11,11 +11,11 @@ import it.istat.proxy.model.RegioniJson;
 import it.istat.proxy.model.Response;
 import it.istat.proxy.storage.ComuniRepositoryI;
 import it.istat.proxy.utils.CalcDuration;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j;
 
 
 @RestController
-@Slf4j
+@Log4j
 public class RegioniController {
 	
 	@Autowired
